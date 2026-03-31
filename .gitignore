@@ -1,0 +1,26 @@
+# Environment & secrets
+.env
+_env
+
+# Database
+*.db
+*.sqlite
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Flask
+instance/
+
+# Migrations (optional - some people include this)
+migrations/
+
+# OS files
+.DS_Store
+Thumbs.
+
