@@ -24,3 +24,5 @@ migrations/
 .DS_Store
 Thumbs.
 
+# Editor
+.vscode

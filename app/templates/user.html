@@ -11,8 +11,25 @@
             {% if user.last_seen %}
             <p>Last seen: {{ user.last_seen }}</p>
             {% endif %}
+            <p>{{ user.followers | length }} followers, {{ user.followed | length }} following</p>
             {% if user == current_user %}
-            <p><a href="{{ url_for('edit_profile') }}">Edit your profile</a></p>
+                <p><a href="{{ url_for('edit_profile') }}">Edit your profile</a></p>
+            {% elif not current_user.is_following(user) %}
+                <p>
+                    <form action="{{url_for('follow_user', username = user.username)}}" method="post">
+                        
+                        {{ form.hidden_tag() }}
+                        {{ form.submit(value = 'follow_user') }}
+                    </form>
+                </p>
+            {% else %}
+                <p>
+                    <form action = "{{url_for('unfollow_user', username = user.username)}}" method = "post">
+
+                        {{ form.hidden_tag() }}
+                        {{ form.submit(value = "unfollow_user" )}}
+                    </form>
+                </p>
             {% endif %}
             </td>
         </tr>
