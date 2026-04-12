@@ -6,8 +6,10 @@ from typing import List
 from sqlalchemy import select
 
 with app.app_context():
-    xs = select(Followers)
-    print(db.session.scalars(xs).all())
+    username = 'xavi'
+    user = db.session.execute(select(User).where(User.username==username)).scalar_one_or_none()
+    xs = select(Post).where(User.username=='xavi')
+    print(db.session.execute(xs).all())
 
 
 '''

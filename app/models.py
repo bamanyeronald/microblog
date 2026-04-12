@@ -26,7 +26,7 @@ class User(UserMixin, db.Model):
     about_me:Mapped[Optional[str]] = mapped_column(String(200))
     last_seen:Mapped[datetime] = mapped_column(default=datetime.now(timezone.utc), server_default=func.now())
 
-    post:Mapped[List['Post']] = relationship(back_populates='user')
+    post:Mapped[List['Post']] = relationship(back_populates='author')
     followed:Mapped[List['User']] = relationship(
         'User',
         secondary=Followers,
@@ -77,20 +77,21 @@ class User(UserMixin, db.Model):
 
     def followed_posts(self):
         posts_followed = (select(Post)
-                          .join(Followers, Followers.c.followed_id == Post.user_id)
-                          .where(Followers.c.follower_id == self.id)
-                          )
-        own = (select(Post).where(Post.user_id == self.id))
-        return db.session.scalars(posts_followed.union(own).order_by(Post.timestamp.desc()))
+                      .join(Followers, Followers.c.followed_id == Post.user_id)
+                      .where(Followers.c.follower_id == self.id)
+                      )
+        own = select(Post).where(Post.user_id == self.id)
+        union_query = posts_followed.union_all(own).subquery()
+        return select(Post).join(union_query, Post.id == union_query.c.id).order_by(Post.timestamp.desc())
                                  
 class Post(db.Model):
     __tablename__ = 'posts'
     id:Mapped[int] = mapped_column(primary_key=True)
     user_id:Mapped[UUID] = mapped_column(ForeignKey('users.id'), index=True)
     body:Mapped[str] = mapped_column(Text)
-    timestamp:Mapped[datetime] = mapped_column(default=datetime.now(timezone.utc), index=True)
+    timestamp:Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc), index=True)
 
-    user:Mapped['User'] = relationship(back_populates='post')
+    author:Mapped['User'] = relationship(back_populates='post')
 
     def __repr__(self):
         return f'Post({self.id}, "{self.body}")'
